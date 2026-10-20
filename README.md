@@ -74,7 +74,8 @@ Tela de boas-vindas com o mascote, exibida apenas no primeiro acesso (controlada
 | Comportamento | JavaScript puro (ES5), um módulo por tela no padrão IIFE |
 | Mapa | Leaflet 1.9.4 via CDN unpkg com tiles do OpenStreetMap |
 | Dados de clima | API pública Open-Meteo, sem chave de acesso |
-| Persistência | `localStorage` para checklist, denúncias e flag da tela de abertura |
+| Central de denúncias | Firebase Realtime Database pela API REST, com `fetch` puro e sem SDK |
+| Persistência | `localStorage` para checklist, flag da tela de abertura e cache offline das denúncias |
 | Instalação | `manifest.json` com `theme_color` e ícone, para instalar na tela inicial |
 | Tipografia | Google Fonts: Baloo 2 e Plus Jakarta Sans |
 
@@ -112,6 +113,15 @@ Para ver o app como celular no desktop, abra o DevTools (`F12`) e ative o modo d
 
 Para rever a tela de abertura, limpe o `localStorage` do site no DevTools, em Application, Local Storage.
 
+## Central de denúncias compartilhada
+
+As denúncias não ficam presas ao aparelho de quem registrou. O módulo [scripts/nuvem.js](scripts/nuvem.js) conversa com um Firebase Realtime Database pela API REST, usando apenas `fetch`, sem SDK e sem build. Qualquer cidadão que abrir o app vê os focos registrados por todos os outros.
+
+- Leitura a cada 5 segundos, e só enquanto a tela de denúncia está aberta, para não gastar bateria e dados.
+- `GET /denuncias.json` para listar, `POST /denuncias.json` para registrar e `PATCH /denuncias/{id}.json` para mudar o status.
+- **Degradação graciosa em três camadas:** toda requisição tem limite de 8 segundos; se a nuvem não responder no envio, a denúncia é salva no aparelho e o usuário é avisado; se falhar na leitura, o mapa mantém o que já havia carregado. O app nunca trava por causa da rede.
+- As 3 denúncias de exemplo são locais e nunca sobem para a nuvem, para que cada novo visitante não duplique a base.
+
 ## Como funciona o cálculo do risco
 
 A nota de 0 a 100 soma três fatores, cada um com peso próprio:
@@ -138,6 +148,6 @@ A decisão de arquitetura, a identidade visual e a validação de cada tela fora
 
 ## Observações da demonstração
 
-- As denúncias ficam no `localStorage` do próprio navegador. Em produção, o envio iria para a API da vigilância municipal.
+- As denúncias são compartilhadas entre todos os aparelhos pela central na nuvem. O `localStorage` passa a ser a camada offline.
 - A foto da denúncia é exibida em prévia, mas não é persistida, para não estourar o limite do `localStorage`.
 - Tocar no selo de status avança o status manualmente. É um recurso de demonstração, não uma funcionalidade do cidadão.
