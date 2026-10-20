@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Dengue Zero NL</title>
+<meta name="description" content="Aplicativo de prevenção e denúncia de focos de dengue em Nova Londrina, PR.">
+<meta name="theme-color" content="#0B4F9C">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="imagens/mascote.png">
+<link rel="apple-touch-icon" href="imagens/mascote.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="estilos/base.css">
+<link rel="stylesheet" href="estilos/componentes.css">
+<link rel="stylesheet" href="estilos/telas.css">
+</head>
+<body>
+
+<svg class="svg-sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <symbol id="ic-casa" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5"/><path d="M9.5 21v-6h5v6"/></symbol>
+    <symbol id="ic-check" viewBox="0 0 24 24"><path d="M9 11.5l2.5 2.5L20 5.5"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></symbol>
+    <symbol id="ic-mais" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+    <symbol id="ic-mapa" viewBox="0 0 24 24"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></symbol>
+    <symbol id="ic-pulso" viewBox="0 0 24 24"><path d="M3 12h3.5l2-5 3 10 2.5-5H21"/></symbol>
+    <symbol id="ic-sino" viewBox="0 0 24 24"><path d="M18 9a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></symbol>
+    <symbol id="ic-local" viewBox="0 0 24 24"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></symbol>
+    <symbol id="ic-termometro" viewBox="0 0 24 24"><path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z"/></symbol>
+    <symbol id="ic-chuva" viewBox="0 0 24 24"><path d="M7 16a4 4 0 0 1-.4-7.98A5.5 5.5 0 0 1 17.4 9H18a3.5 3.5 0 0 1 .3 6.98"/><path d="M9 19.5 8 22"/><path d="M13 19.5 12 22"/><path d="M17 19.5 16 22"/></symbol>
+    <symbol id="ic-gota" viewBox="0 0 24 24"><path d="M12 3s5.5 6.1 5.5 10a5.5 5.5 0 1 1-11 0C6.5 9.1 12 3 12 3z"/></symbol>
+    <symbol id="ic-megafone" viewBox="0 0 24 24"><path d="M3 11v2a1 1 0 0 0 1 1h3l7 5V5L7 10H4a1 1 0 0 0-1 1z"/><path d="M17.5 9a4.5 4.5 0 0 1 0 6"/></symbol>
+    <symbol id="ic-lampada" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 1 3.6 10.8c-.5.4-.8 1-.8 1.6v.6H9.2v-.6c0-.6-.3-1.2-.8-1.6A6 6 0 0 1 12 3z"/></symbol>
+    <symbol id="ic-camera" viewBox="0 0 24 24"><path d="M4 8h2.5l1.3-2.2a1 1 0 0 1 .9-.5h6.6a1 1 0 0 1 .9.5L17.5 8H20a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.4"/></symbol>
+    <symbol id="ic-mira" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 1.5v3.5"/><path d="M12 19v3.5"/><path d="M1.5 12H5"/><path d="M19 12h3.5"/><circle cx="12" cy="12" r="2.2"/></symbol>
+    <symbol id="ic-enviar" viewBox="0 0 24 24"><path d="M21 3 10.5 13.5"/><path d="M21 3l-6.8 18-3.7-7.5L3 9.8 21 3z"/></symbol>
+    <symbol id="ic-alerta" viewBox="0 0 24 24"><path d="M10.6 4.1 2.9 17.4A1.6 1.6 0 0 0 4.3 20h15.4a1.6 1.6 0 0 0 1.4-2.6L13.4 4.1a1.6 1.6 0 0 0-2.8 0z"/><path d="M12 9.5v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="ic-telefone" viewBox="0 0 24 24"><path d="M6.5 3h3l1.5 4-2 1.5a11 11 0 0 0 5.5 5.5L16 12l4 1.5v3a2 2 0 0 1-2.2 2A15.5 15.5 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3z"/></symbol>
+    <symbol id="ic-hospital" viewBox="0 0 24 24"><path d="M4 21V7a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14"/><path d="M3 21h18"/><path d="M12 9.5v6"/><path d="M9 12.5h6"/></symbol>
+    <symbol id="ic-recarregar" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 5v6h-6"/></symbol>
+    <symbol id="ic-relogio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="ic-trofeu" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 5.5H5.5A2.5 2.5 0 0 0 8 10"/><path d="M16 5.5h2.5A2.5 2.5 0 0 1 16 10"/><path d="M10 13.5V17"/><path d="M14 13.5V17"/><path d="M8.5 20h7"/></symbol>
+  </defs>
+</svg>
+
+<div class="moldura">
+<div class="aparelho" id="aparelho">
+
+<main id="conteudo">
+
+  <section class="tela tela-abertura" id="abertura" aria-labelledby="titulo-abertura">
+    <div class="abertura-corpo">
+      <p class="abertura-cidade">Nova Londrina</p>
+      <h1 class="abertura-titulo" id="titulo-abertura">Dengue Zero <span class="destaque-nl">NL</span></h1>
+      <div class="abertura-mascote">
+        <img src="imagens/mascote.png" alt="Mascote do aplicativo Dengue Zero NL" width="220" height="220">
+      </div>
+      <p class="abertura-frase">Juntos contra o <em>Aedes aegypti</em>. Previna, denuncie e cuide da sua família.</p>
+      <button class="botao botao-claro botao-bloco" type="button" id="btn-comecar">Começar</button>
+      <div class="abertura-logo">
+        <img src="imagens/logo-senac-sintec.png" alt="Logo Senac e SINTEC" height="34">
+      </div>
+    </div>
+  </section>
+
+  <section class="tela" id="inicio" aria-labelledby="titulo-inicio" hidden>
+    <header class="cabecalho">
+      <div class="cabecalho-linha">
+        <div>
+          <p class="cabecalho-ola">Olá, cidadão</p>
+          <h1 class="cabecalho-app" id="titulo-inicio">Dengue Zero <span class="destaque-nl">NL</span></h1>
+        </div>
+        <button class="botao-icone botao-icone-claro" type="button" id="btn-notificacao" aria-label="Ver notificações">
+          <svg class="icone" aria-hidden="true"><use href="#ic-sino"></use></svg>
+          <span class="ponto-notificacao" aria-hidden="true"></span>
+        </button>
+      </div>
+      <p class="cabecalho-local">
+        <svg class="icone icone-p" aria-hidden="true"><use href="#ic-local"></use></svg>
+        Nova Londrina, PR
+      </p>
+    </header>
+
+    <div class="conteudo-tela conteudo-sobreposto">
+
+      <article class="cartao cartao-risco" aria-labelledby="titulo-risco">
+        <div class="cartao-topo">
+          <h2 class="titulo-secao" id="titulo-risco">Risco de hoje</h2>
+          <span class="selo-offline" id="selo-offline" hidden>dados offline</span>
+        </div>
+
+        <div class="risco-corpo">
+          <div class="risco-esqueleto" id="risco-esqueleto">
+            <div class="esqueleto esqueleto-anel"></div>
+            <div class="esqueleto-textos">
+              <div class="esqueleto esqueleto-linha" style="width:55%"></div>
+              <div class="esqueleto esqueleto-linha" style="width:92%"></div>
+              <div class="esqueleto esqueleto-linha" style="width:72%"></div>
+            </div>
+          </div>
+
+          <div class="risco-dados" id="risco-dados" hidden>
+            <div class="anel" id="anel-risco" role="img" aria-label="Nota de risco de hoje">
+              <div class="anel-centro">
+                <strong class="anel-nota" id="anel-nota">0</strong>
+                <span class="anel-escala">/100</span>
+              </div>
+            </div>
+            <div class="risco-texto">
+              <span class="chip-nivel" id="chip-nivel">Calculando</span>
+              <p class="risco-frase" id="risco-frase"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mini-cartoes">
+          <div class="mini-cartao">
+            <svg class="icone icone-p mini-icone" aria-hidden="true"><use href="#ic-termometro"></use></svg>
+            <span class="mini-valor" id="valor-temperatura">--</span>
+            <span class="mini-rotulo">Temperatura</span>
+          </div>
+          <div class="mini-cartao">
+            <svg class="icone icone-p mini-icone" aria-hidden="true"><use href="#ic-chuva"></use></svg>
+            <span class="mini-valor" id="valor-chuva">--</span>
+            <span class="mini-rotulo">Chuva 7 dias</span>
+          </div>
+          <div class="mini-cartao">
+            <svg class="icone icone-p mini-icone" aria-hidden="true"><use href="#ic-gota"></use></svg>
+            <span class="mini-valor" id="valor-umidade">--</span>
+            <span class="mini-rotulo">Umidade</span>
+          </div>
+        </div>
+      </article>
+
+      <h2 class="titulo-secao titulo-bloco">Atalhos</h2>
+      <nav class="grade-atalhos" aria-label="Atalhos principais">
+        <a class="atalho atalho-azul" href="#denunciar">
+          <svg class="icone" aria-hidden="true"><use href="#ic-megafone"></use></svg>
+          <strong>Denunciar foco</strong>
+          <span>Envie a foto e o local</span>
+        </a>
+        <a class="atalho" href="#checklist">
+          <svg class="icone" aria-hidden="true"><use href="#ic-check"></use></svg>
+          <strong>Checklist da casa</strong>
+          <span>8 passos rápidos</span>
+        </a>
+        <a class="atalho" href="#sintomas">
+          <svg class="icone" aria-hidden="true"><use href="#ic-pulso"></use></svg>
+          <strong>Estou com sintomas</strong>
+          <span>Triagem orientativa</span>
+        </a>
+        <a class="atalho" href="#denunciar" data-ir-mapa="1">
+          <svg class="icone" aria-hidden="true"><use href="#ic-mapa"></use></svg>
+          <strong>Mapa dos focos</strong>
+          <span>Veja a sua região</span>
+        </a>
+      </nav>
+
+      <article class="cartao cartao-dica" aria-labelledby="titulo-dica">
+        <div class="dica-cabecalho">
+          <svg class="icone icone-p" aria-hidden="true"><use href="#ic-lampada"></use></svg>
+          <h2 class="titulo-secao" id="titulo-dica">Dica do dia</h2>
+        </div>
+        <p class="dica-texto" id="dica-texto"></p>
+        <button class="botao botao-sutil" type="button" id="btn-nova-dica">
+          <svg class="icone icone-p" aria-hidden="true"><use href="#ic-recarregar"></use></svg>
+          Outra dica
+        </button>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="tela" id="checklist" aria-labelledby="titulo-checklist" hidden>
+    <header class="cabecalho">
+      <div class="cabecalho-linha">
+        <div>
+          <p class="cabecalho-ola">Checklist</p>
+          <h1 class="cabecalho-app" id="titulo-checklist">10 minutos contra a dengue</h1>
+        </div>
+      </div>
+      <p class="cabecalho-local">
+        <svg class="icone icone-p" aria-hidden="true"><use href="#ic-relogio"></use></svg>
+        Uma vistoria por semana na sua casa
+      </p>
+    </header>
+
+    <div class="conteudo-tela conteudo-sobreposto">
+
+      <article class="cartao cartao-progresso">
+        <div class="progresso-topo">
+          <strong class="progresso-contagem" id="progresso-contagem">0 de 8 concluídos</strong>
+          <span class="chip chip-pontos" id="progresso-pontos">0 pontos</span>
+        </div>
+        <div class="barra" role="progressbar" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" aria-label="Progresso do checklist" id="barra-progresso">
+          <div class="barra-preenchida" id="barra-preenchida"></div>
+        </div>
+        <p class="progresso-ajuda">Cada item marcado vale 10 pontos de prevenção.</p>
+      </article>
+
+      <article class="cartao cartao-parabens" id="cartao-parabens" hidden>
+        <div class="confete" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <img src="imagens/mascote.png" alt="Mascote comemorando a vistoria concluída" width="96" height="96">
+        <h2 class="parabens-titulo">
+          <svg class="icone icone-p" aria-hidden="true"><use href="#ic-trofeu"></use></svg>
+          Casa protegida
+        </h2>
+        <p>Você concluiu os 8 itens da semana e somou 80 pontos. Repita a vistoria em sete dias.</p>
+      </article>
+
+      <h2 class="titulo-secao titulo-bloco">Itens da vistoria</h2>
+      <ul class="lista-checklist" id="lista-checklist"></ul>
+
+      <button class="botao botao-contorno botao-bloco" type="button" id="btn-reiniciar">
+        <svg class="icone icone-p" aria-hidden="true"><use href="#ic-recarregar"></use></svg>
+        Reiniciar semana
+      </button>
+
+    </div>
+  </section>
+
+  <section class="tela" id="denunciar" aria-labelledby="titulo-denunciar" hidden>
+    <header class="cabecalho">
+      <div class="cabecalho-linha">
+        <div>
+          <p class="cabecalho-ola">Denunciar</p>
+          <h1 class="cabecalho-app" id="titulo-denunciar">Foco de dengue</h1>
+        </div>
+      </div>
+      <p class="cabecalho-local">
+        <svg class="icone icone-p" aria-hidden="true"><use href="#ic-local"></use></svg>
+        A denúncia vai para a vigilância municipal
+      </p>
+    </header>
+
+    <div class="conteudo-tela conteudo-sobreposto">
+
+      <form class="formulario" id="form-denuncia" novalidate>
+
+        <article class="cartao">
+          <h2 class="titulo-secao">Foto do local</h2>
+          <p class="texto-apoio">Opcional, mas ajuda muito a equipe de campo.</p>
+          <label class="area-foto" for="campo-foto">
+            <img class="previa-foto" id="previa-foto" alt="Prévia da foto escolhida" hidden>
+            <span class="area-foto-vazia" id="area-foto-vazia">
+              <svg class="icone" aria-hidden="true"><use href="#ic-camera"></use></svg>
+              <strong>Tirar foto ou escolher</strong>
+              <span>JPG ou PNG</span>
+            </span>
+          </label>
+          <input class="campo-arquivo" type="file" id="campo-foto" accept="image/*" capture="environment">
+          <button class="botao botao-sutil" type="button" id="btn-remover-foto" hidden>Remover foto</button>
+        </article>
+
+        <article class="cartao">
+          <h2 class="titulo-secao">Tipo do foco</h2>
+          <p class="texto-apoio">Escolha a opção mais parecida.</p>
+          <div class="grupo-chips" id="chips-tipo" role="radiogroup" aria-label="Tipo do foco">
+            <button class="chip chip-selecionavel" type="button" role="radio" aria-checked="false" data-valor="Lote vago com lixo">Lote vago com lixo</button>
+            <button class="chip chip-selecionavel" type="button" role="radio" aria-checked="false" data-valor="Pneus expostos">Pneus expostos</button>
+            <button class="chip chip-selecionavel" type="button" role="radio" aria-checked="false" data-valor="Piscina suja">Piscina suja</button>
+            <button class="chip chip-selecionavel" type="button" role="radio" aria-checked="false" data-valor="Caixa d'água aberta">Caixa d'água aberta</button>
+            <button class="chip chip-selecionavel" type="button" role="radio" aria-checked="false" data-valor="Outros">Outros</button>
+          </div>
+          <p class="erro-campo" id="erro-tipo" role="alert" hidden>Selecione um tipo de foco.</p>
+        </article>
+
+        <article class="cartao" id="cartao-mapa">
+          <h2 class="titulo-secao">Localização</h2>
+          <p class="texto-apoio">Toque no mapa para ajustar o marcador.</p>
+          <div class="mapa" id="mapa" role="application" aria-label="Mapa de focos de dengue em Nova Londrina"></div>
+          <ul class="legenda" aria-label="Legenda de status">
+            <li><span class="bolinha bolinha-aberta" aria-hidden="true"></span>Aberta</li>
+            <li><span class="bolinha bolinha-verificacao" aria-hidden="true"></span>Em verificação</li>
+            <li><span class="bolinha bolinha-resolvida" aria-hidden="true"></span>Resolvida</li>
+          </ul>
+          <p class="coordenada" id="coordenada">Nenhum ponto escolhido.</p>
+          <button class="botao botao-contorno botao-bloco" type="button" id="btn-localizacao">
+            <svg class="icone icone-p" aria-hidden="true"><use href="#ic-mira"></use></svg>
+            Usar minha localização
+          </button>
+          <p class="erro-campo" id="erro-local" role="alert" hidden>Escolha o local do foco no mapa.</p>
+        </article>
+
+        <article class="cartao">
+          <h2 class="titulo-secao">Detalhes</h2>
+          <label class="rotulo" for="campo-detalhes">Descreva o que você viu</label>
+          <textarea class="campo-texto" id="campo-detalhes" rows="4" placeholder="Exemplo: terreno com pneus e água parada ao lado do número 320."></textarea>
+        </article>
+
+        <button class="botao botao-laranja botao-bloco botao-grande" type="submit" id="btn-enviar">
+          <svg class="icone icone-p" aria-hidden="true"><use href="#ic-enviar"></use></svg>
+          Enviar denúncia
+        </button>
+      </form>
+
+      <h2 class="titulo-secao titulo-bloco">Minhas denúncias</h2>
+      <p class="texto-apoio texto-apoio-solto">Toque no selo de status para simular o andamento.</p>
+      <ul class="lista-denuncias" id="lista-denuncias"></ul>
+
+    </div>
+  </section>
+
+  <section class="tela" id="sintomas" aria-labelledby="titulo-sintomas" hidden>
+    <header class="cabecalho">
+      <div class="cabecalho-linha">
+        <div>
+          <p class="cabecalho-ola">Triagem</p>
+          <h1 class="cabecalho-app" id="titulo-sintomas">Estou com sintomas</h1>
+        </div>
+      </div>
+      <p class="cabecalho-local">
+        <svg class="icone icone-p" aria-hidden="true"><use href="#ic-pulso"></use></svg>
+        Marque o que você está sentindo
+      </p>
+    </header>
+
+    <div class="conteudo-tela conteudo-sobreposto">
+
+      <article class="cartao">
+        <h2 class="titulo-secao">Sintomas comuns</h2>
+        <div class="grupo-chips" id="chips-comuns">
+          <button class="chip chip-selecionavel" type="button" aria-pressed="false" data-valor="Febre alta">Febre alta</button>
+          <button class="chip chip-selecionavel" type="button" aria-pressed="false" data-valor="Dor no corpo">Dor no corpo</button>
+          <button class="chip chip-selecionavel" type="button" aria-pressed="false" data-valor="Dor atrás dos olhos">Dor atrás dos olhos</button>
+          <button class="chip chip-selecionavel" type="button" aria-pressed="false" data-valor="Manchas na pele">Manchas na pele</button>
+          <button class="chip chip-selecionavel" type="button" aria-pressed="false" data-valor="Dor de cabeça">Dor de cabeça</button>
+        </div>
+      </article>
+
+      <article class="cartao cartao-alarme">
+        <div class="alarme-cabecalho">
+          <svg class="icone icone-p" aria-hidden="true"><use href="#ic-alerta"></use></svg>
+          <h2 class="titulo-secao">Sinais de alarme</h2>
+        </div>
+        <p class="texto-apoio">Estes sinais pedem atendimento imediato.</p>
+        <div class="grupo-chips" id="chips-alarme">
+          <button class="chip chip-selecionavel chip-perigo" type="button" aria-pressed="false" data-valor="Dor forte na barriga">Dor forte na barriga</button>
+          <button class="chip chip-selecionavel chip-perigo" type="button" aria-pressed="false" data-valor="Vômitos frequentes">Vômitos frequentes</button>
+          <button class="chip chip-selecionavel chip-perigo" type="button" aria-pressed="false" data-valor="Sangramento">Sangramento</button>
+          <button class="chip chip-selecionavel chip-perigo" type="button" aria-pressed="false" data-valor="Tontura ou desmaio">Tontura ou desmaio</button>
+        </div>
+      </article>
+
+      <div id="resultado-sintomas" aria-live="polite"></div>
+
+      <article class="cartao cartao-hospital">
+        <h2 class="titulo-secao">Onde procurar atendimento</h2>
+        <div class="hospital-linha">
+          <svg class="icone" aria-hidden="true"><use href="#ic-hospital"></use></svg>
+          <div class="hospital-dados">
+            <strong>Hospital Municipal Santa Rita de Cássia</strong>
+            <span>Av. Aristides Martelo, 357, Centro</span>
+            <span>Nova Londrina, PR</span>
+          </div>
+        </div>
+        <div class="resultado-acoes">
+          <a class="botao botao-contorno" href="tel:+554434321198">
+            <svg class="icone icone-p" aria-hidden="true"><use href="#ic-telefone"></use></svg>
+            (44) 3432-1198
+          </a>
+          <a class="botao botao-contorno" href="https://www.google.com/maps/search/?api=1&amp;query=Hospital+Municipal+Santa+Rita+de+C%C3%A1ssia%2C+Nova+Londrina%2C+PR" target="_blank" rel="noopener">
+            <svg class="icone icone-p" aria-hidden="true"><use href="#ic-mapa"></use></svg>
+            Ver rota
+          </a>
+        </div>
+      </article>
+
+      <article class="cartao">
+        <h2 class="titulo-secao">Enquanto isso</h2>
+        <ul class="lista-simples">
+          <li>Beba bastante água e soro caseiro ao longo do dia.</li>
+          <li>Não tome AAS nem ibuprofeno sem orientação médica.</li>
+          <li>Descanse e observe se aparecem sinais de alarme.</li>
+        </ul>
+      </article>
+
+      <p class="aviso-discreto">Esta triagem não substitui avaliação médica.</p>
+
+    </div>
+  </section>
+
+</main>
+
+<nav class="barra-navegacao" aria-label="Navegação principal">
+  <a class="item-nav" href="#inicio" data-nav="inicio">
+    <svg class="icone" aria-hidden="true"><use href="#ic-casa"></use></svg>
+    <span>Início</span>
+  </a>
+  <a class="item-nav" href="#checklist" data-nav="checklist">
+    <svg class="icone" aria-hidden="true"><use href="#ic-check"></use></svg>
+    <span>Checklist</span>
+  </a>
+  <a class="item-nav item-nav-central" href="#denunciar" data-nav="denunciar" aria-label="Denunciar foco">
+    <span class="botao-central">
+      <svg class="icone" aria-hidden="true"><use href="#ic-mais"></use></svg>
+    </span>
+  </a>
+  <a class="item-nav" href="#denunciar" data-nav="mapa" data-ir-mapa="1">
+    <svg class="icone" aria-hidden="true"><use href="#ic-mapa"></use></svg>
+    <span>Mapa</span>
+  </a>
+  <a class="item-nav" href="#sintomas" data-nav="sintomas">
+    <svg class="icone" aria-hidden="true"><use href="#ic-pulso"></use></svg>
+    <span>Sintomas</span>
+  </a>
+</nav>
+
+<div class="area-toast" id="area-toast" aria-live="polite" aria-atomic="true"></div>
+
+</div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="scripts/clima.js"></script>
+<script src="scripts/checklist.js"></script>
+<script src="scripts/denuncia.js"></script>
+<script src="scripts/sintomas.js"></script>
+<script src="scripts/app.js"></script>
+</body>
+</html>
