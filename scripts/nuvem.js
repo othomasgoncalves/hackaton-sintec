@@ -1,6 +1,6 @@
 window.Nuvem = (function () {
   var CONFIG = {
-    base: "",
+    base: "https://hackaton-sintec-default-rtdb.firebaseio.com",
     tempoLimite: 8000,
     intervaloSincronia: 5000
   };
