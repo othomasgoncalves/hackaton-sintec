@@ -41,35 +41,84 @@ window.Denuncia = (function () {
   ];
 
   var lista = [];
+  var locais = [];
+  var daNuvem = [];
+  var avisouOffline = false;
+  var relogioSincronia = null;
   var mapa = null;
   var camadaFocos = null;
   var marcadorNovo = null;
   var pontoEscolhido = null;
   var tipoEscolhido = null;
 
+  function recompor() {
+    if (window.Nuvem.ativa()) {
+      lista = EXEMPLOS.concat(daNuvem);
+      return;
+    }
+    lista = locais;
+  }
+
   function carregar() {
+    locais = [];
     try {
       var salvo = window.localStorage.getItem(CHAVE);
       if (salvo) {
         var convertido = JSON.parse(salvo);
         if (convertido && convertido.length) {
-          lista = convertido;
-          return;
+          locais = convertido;
         }
       }
     } catch (erro) {
-      lista = [];
+      locais = [];
     }
-    lista = EXEMPLOS.slice();
-    salvar();
+    if (!locais.length) {
+      locais = EXEMPLOS.slice();
+      salvar();
+    }
+    recompor();
   }
 
   function salvar() {
     try {
-      window.localStorage.setItem(CHAVE, JSON.stringify(lista));
+      window.localStorage.setItem(CHAVE, JSON.stringify(locais));
     } catch (erro) {
       return;
     }
+  }
+
+  function sincronizar() {
+    if (!window.Nuvem.ativa()) {
+      return;
+    }
+    window.Nuvem.listar().then(function (resultado) {
+      if (!resultado) {
+        if (!avisouOffline) {
+          avisouOffline = true;
+          window.App.mostrarToast("Sem conexão com a central, usando este aparelho", "neutro");
+        }
+        return;
+      }
+      avisouOffline = false;
+      if (JSON.stringify(resultado) === JSON.stringify(daNuvem)) {
+        return;
+      }
+      daNuvem = resultado;
+      recompor();
+      desenharLista();
+      desenharFocos();
+    });
+  }
+
+  function ligarSincronia() {
+    if (!window.Nuvem.ativa() || relogioSincronia) {
+      return;
+    }
+    relogioSincronia = window.setInterval(function () {
+      if (!document.getElementById("denunciar").hidden) {
+        sincronizar();
+      }
+    }, window.Nuvem.intervalo);
   }
 
   function proximoProtocolo() {
@@ -176,6 +225,7 @@ window.Denuncia = (function () {
 
   function ajustarMapa() {
     montarMapa();
+    sincronizar();
     if (mapa) {
       window.setTimeout(function () {
         mapa.invalidateSize();
@@ -230,7 +280,11 @@ window.Denuncia = (function () {
       selo.addEventListener("click", function () {
         var posicao = STATUS.indexOf(item.status);
         item.status = STATUS[(posicao + 1) % STATUS.length];
-        salvar();
+        if (item.nuvemId) {
+          window.Nuvem.atualizarStatus(item.nuvemId, item.status);
+        } else {
+          salvar();
+        }
         desenharLista();
         desenharFocos();
         window.App.mostrarToast(item.protocolo + " agora está " + item.status.toLowerCase(), "neutro");
@@ -350,8 +404,32 @@ window.Denuncia = (function () {
       status: "Aberta"
     };
 
-    lista.push(nova);
-    salvar();
+    if (window.Nuvem.ativa()) {
+      daNuvem.push(nova);
+      recompor();
+      window.Nuvem.enviar({
+        protocolo: nova.protocolo,
+        tipo: nova.tipo,
+        detalhes: nova.detalhes,
+        lat: nova.lat,
+        lng: nova.lng,
+        data: nova.data,
+        status: nova.status
+      }).then(function (id) {
+        if (id) {
+          nova.nuvemId = id;
+          return;
+        }
+        locais.push(nova);
+        salvar();
+        window.App.mostrarToast("Sem conexão, salvo só neste aparelho", "neutro");
+      });
+    } else {
+      locais.push(nova);
+      salvar();
+      recompor();
+    }
+
     desenharLista();
     desenharFocos();
 
@@ -373,6 +451,8 @@ window.Denuncia = (function () {
     ligarFoto();
     ligarTipos();
     ligarLocalizacao();
+    ligarSincronia();
+    sincronizar();
     document.getElementById("form-denuncia").addEventListener("submit", enviar);
   }
 
