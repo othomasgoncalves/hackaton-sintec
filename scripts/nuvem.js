@@ -2,7 +2,7 @@ window.Nuvem = (function () {
   var CONFIG = {
     base: "",
     tempoLimite: 8000,
-    intervaloSincronia: 12000
+    intervaloSincronia: 5000
   };
 
   function ativa() {
