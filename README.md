@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/screenshots/01-splash.jpg" alt="Tela inicial do Dengue Zero NL" width="220">
+<img src="docs/screenshots/01-splash.jpeg" alt="Tela inicial do Dengue Zero NL" width="220">
 
 # Dengue Zero NL
 
@@ -40,22 +40,22 @@ O projeto foi desenvolvido no **Hackathon SINTEC (Senac)**, cujo desafio era cri
 <table>
   <tr>
     <td align="center" valign="top" width="25%">
-      <img src="docs/screenshots/02-inicio.jpg" alt="Tela de início com índice de risco do dia" width="200"><br>
+      <img src="docs/screenshots/02-inicio.jpeg" alt="Tela de início com índice de risco do dia" width="200"><br>
       <b>Início</b><br>
       <sub>Risco do dia, clima e atalhos</sub>
     </td>
     <td align="center" valign="top" width="25%">
-      <img src="docs/screenshots/03-checklist.jpg" alt="Checklist semanal de vistoria da casa" width="200"><br>
+      <img src="docs/screenshots/03-checklist.jpeg" alt="Checklist semanal de vistoria da casa" width="200"><br>
       <b>Checklist</b><br>
       <sub>Vistoria de 10 minutos com pontuação</sub>
     </td>
     <td align="center" valign="top" width="25%">
-      <img src="docs/screenshots/04-denuncia.jpg" alt="Formulário de denúncia de foco com mapa" width="200"><br>
+      <img src="docs/screenshots/04-denuncia.jpeg" alt="Formulário de denúncia de foco com mapa" width="200"><br>
       <b>Denúncia</b><br>
       <sub>Foto, tipo do foco e localização no mapa</sub>
     </td>
     <td align="center" valign="top" width="25%">
-      <img src="docs/screenshots/05-sintomas.jpg" alt="Triagem orientativa de sintomas" width="200"><br>
+      <img src="docs/screenshots/05-sintomas.jpeg" alt="Triagem orientativa de sintomas" width="200"><br>
       <b>Sintomas</b><br>
       <sub>Triagem e sinais de alarme</sub>
     </td>
